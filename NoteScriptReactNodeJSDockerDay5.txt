@@ -1,0 +1,329 @@
+*****************************************************
+React NodeJS Docker Workshop Online
+*****************************************************
+-------------------------------------------------------------
+Day 5: React & Strapi API
+-------------------------------------------------------------
+-----
+# การเขียน React เรียกทำงานกับ Strapi API
+-----
+Step 1: ปรับ UI หน้า Login.tsx ด้วย MUI
+---
+import { Grid, TextField, Button, Box, Container, Typography, Checkbox, FormControlLabel, Link } from "@mui/material"
+
+return (
+    <>
+      <Container component="main" maxWidth="xs">
+
+        <Box
+          sx={{
+            boxShadow: 3,
+            borderRadius: 2,
+            px: 4,
+            py: 6,
+            marginTop: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography component="h5" variant="h5">
+            Sign in
+          </Typography>
+
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
+
+            <TextField
+              margin="normal"
+              fullWidth
+              autoFocus
+              label="Username"
+              type="text"
+              variant="outlined"
+              {...register("username", { required: true, minLength: 5 })}
+              error={errors.username ? true : false}
+              helperText={errors.username ? "Username is required" : ""}
+            />
+
+            <TextField
+              margin="normal"
+              fullWidth
+              label="Password"
+              type="password"
+              variant="outlined"
+              {...register("password", { required: true })}
+              error={errors.password ? true : false}
+              helperText={errors.password ? "Password is required" : ""}
+            />
+
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Remember me"
+            />
+
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="info"
+              sx={{ mt: 3, mb: 3 }}
+            >
+              Submit
+            </Button>
+
+            <Grid container>
+              <Grid item xs>
+                <Link href="#" variant="body2">
+                  Forgot password?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link href="#" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
+
+          </Box>
+        </Box>
+
+      </Container >
+    </>
+  )
+
+Step 2: ติดตั้ง library "axios" ใน React โปรเจ็กต์
+---
+docker compose exec react_dev npm install axios
+
+และ
+npm install axios
+
+Step 3: สร้าง .env ไฟล์ กำหนด Base URL API
+---
+VITE_BASE_URL_API="http://localhost:1337/api"
+
+Step 4: สร้าง service "authUserAPI.ts" ใน services/authUserAPI.ts
+---
+// import axios
+import Axios from 'axios'
+
+// login function
+const authLogin = (data: any) => {
+    return Axios.post('/auth/local', data , {
+        baseURL: import.meta.env.VITE_BASE_URL_API,
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+}
+
+export default { authLogin }
+
+Step 5: เขียน  Handle submit เชื่อมต่อ API ที่หน้า Login.tsx
+---
+import api from "../../services/authUserAPI"
+
+// Handle submit
+  const onSubmit = (data: any) => {
+    
+    // Call API
+    const authData = {
+      "identifier": data.username,
+      "password": data.password
+    }
+
+    api.authLogin(authData).then((res: any) => {
+       // Save token to local storage
+       localStorage.setItem("token", res.data.jwt)
+       // Redirect to dashboard
+       window.location.href = "/backend/dashboard"
+    }).catch((err: any) => {
+      console.log(err)
+    })
+
+  }
+
+
+Step 6: การทำ Protected Route หน้า Backend
+----
+สร้างโฟลเดอร์ router ใน src และสร้างไฟล์ ProtectedRoute.tsx
+---
+import { ReactNode } from "react"
+import { Navigate } from 'react-router-dom'
+
+// Get Token from Local Storage
+const token = localStorage.getItem("token")
+
+type ProtectedRouteProps = {
+    redirectPath?: string,
+    children: ReactNode
+}
+
+const ProtectedRoute = ({
+    redirectPath ="/",
+    children
+}: ProtectedRouteProps) => {
+    if(!token){
+        return <Navigate to={redirectPath} />
+    }
+    return children
+}
+
+export default ProtectedRoute
+
+Step 7: นำ ProtectedRoute ไปใช้ที่หน้า App.tsx
+----
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+import AuthLayout from "./layouts/AuthLayout"
+import Login from "./pages/Login"
+import BackendLayout from "./layouts/BackendLayout"
+import Dashboard from "./pages/Dashboard"
+import Product from "./pages/Product"
+import Report from "./pages/Report"
+import Setting from "./pages/Setting"
+import { DASHBOARD_PATH, PRODUCT_PATH, REPORT_PATH, SETTING_PATH  } from './config/constants'
+import ProtectedRoute from "./router/ProtectedRoute"
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        
+        <Route element={<AuthLayout />}>
+          <Route path="/" element={<Login />} />
+        </Route>
+        
+        <Route element={<ProtectedRoute><BackendLayout /></ProtectedRoute> }>
+          <Route path={DASHBOARD_PATH} element={<Dashboard />} />
+          <Route path={PRODUCT_PATH} element={<Product />} />
+          <Route path={REPORT_PATH} element={<Report />} />
+          <Route path={SETTING_PATH} element={<Setting />} />
+        </Route>
+
+      </Routes>
+    </BrowserRouter>
+  )
+
+}
+
+export default App
+
+Step 8: เขียนConfig Axios แบบมีการใส่  Authorization ที่ไฟล์ services/configAxios.ts
+----
+
+import Axios from 'axios'
+
+// read token from localStorage
+const token = localStorage.getItem('token');
+
+export default Axios.create({
+    baseURL: import.meta.env.VITE_BASE_URL_API,
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Accept': 'application/json'
+    }
+})
+
+
+Step 9: เขียน API อ่าน Product แบบมีการ Authorization โดยการสร้างไฟล์ productAPI.ts
+----
+import http from './configAxios'
+
+// Read All Products
+const getAllProducts = () => {
+    return http.get('/products')
+}
+
+export default { getAllProducts }
+
+
+Step 10: เขียนส่วนการแสดงผล Products ที่ไฟล์ pages/Product.tsx
+---
+import { PRODUCT_TITLE, SYSTEM_NAME } from "../config/constants"
+import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material"
+import api from "../../services/productAPI"
+import { useState, useEffect } from "react"
+
+const Product = () => {
+
+    // Create state for products
+    const [products, setProducts] = useState([])
+
+    // Read all products
+    const readAllProducts = () => {
+        api.getAllProducts().then(response => {
+            setProducts(response.data.data)
+        })
+    }
+
+    // initial load with useEffect
+    useEffect(() => {
+        readAllProducts()
+    }, [])
+
+    console.log(products)
+
+    // Set title
+    document.title =  PRODUCT_TITLE + ' | ' + SYSTEM_NAME
+
+    return (
+        <>
+            <h1>Products</h1>
+            <Box sx={styles.columnsContainer}>
+                   <TableContainer>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>ID</TableCell>
+                                    <TableCell>Name</TableCell>
+                                    <TableCell>Price</TableCell>
+                                    <TableCell>Image</TableCell>
+                                    <TableCell>Qty</TableCell>
+                                    <TableCell>Create</TableCell>
+                                    <TableCell>Action</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                { 
+                                    products.map((product: any, index: any) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{product.id}</TableCell>
+                                            <TableCell>{product.attributes.title}</TableCell>
+                                            <TableCell>{product.attributes.price}</TableCell>
+                                            <TableCell>
+                                                <img src={import.meta.env.VITE_BASE_IMAGE_URL+product.attributes.image.data[0].attributes.url} alt="" width={50} />
+                                            </TableCell>
+                                            <TableCell>{product.attributes.qty}</TableCell>
+                                            <TableCell>{product.attributes.publishedAt}</TableCell>
+                                            <TableCell>
+                                                <Button variant="contained" color="warning">Edit</Button>&nbsp;&nbsp;
+                                                <Button variant="contained" color="error">Delete</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    )) 
+                                }
+                            </TableBody>
+                        </Table>
+                   </TableContainer>
+                </Box>
+        </>
+    )
+}
+
+export default Product
+
+const styles = {
+    columnsContainer: {
+        columns: '280px 1',
+        maxWidth: 1400
+    },
+}
+
+
+การใช้งานตัว Template เมื่อติดตั้ง library ผ่าน npm
+ต้องรันคำสั่งแบบนี้
+---
+npm install --legacy-peer-deps

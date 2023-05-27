@@ -1,0 +1,128 @@
+database: strapi
+
+Category
+---
+title		Text
+status		Boolean	(Default value TRUE)
+
+Sample Items
+----
+Cloth
+Electronic
+Mom & Kid
+
+Product
+---
+title		Text
+slug		UID	(Attached field "title")
+description	Rich text
+price		Number	(decimal)
+qty		Number	(integer)
+image		Media	(Multiple media, Allow Images)
+is_featured	Boolean
+category		Relation with Category
+user		Relation with User (from: users-permissions)
+
+
+Sample Items
+----
+
+Xiaomi Redmi Note 11
+
+Redmi Note 11 โฉมใหม่โดดเด่นด้วยดีไซน์เฟรมแบนราบนำเทรนด์ในสไตล์มินิมอล เพลิดเพลินกับเนื้อหาของคุณในอัตรารีเฟรชอันราบรื่นที่สูงถึง 90Hz เลื่อนดูหน้าฟีดโซเชียลมีเดียของคุณได้ลื่นไหล หรือไปสัมผัสประสบการณ์เล่นเกมสุดแรงและตอบสนองฉับไว ชาร์จเต็ม 100% ในเวลาแค่ประมาณหนึ่งชั่วโมงด้วยระบบชาร์จเร็ว 33W* ของ Redmi Note 11 ที่สนับสนุนโดยเทคโนโลยี MMT ใหม่ของ Redmi Note พบกับประโยชน์จากระบบชาร์จเร็วที่จะมาเปลี่ยนชีวิตคุณ 
+
+- Screen Size : 6.43 inch
+- Snapdragon® 680
+- 90Hz AMOLED DotDisplay
+- ระบบชาร์จความเร็วสูง 33W Pro
+- Battery : 5000mAh
+
+Price: 6999
+Qty: 10
+
+------------
+
+Galaxy S23 Ultra (12+512) Phantom Black (5G)
+
+สมาร์ทโฟนที่มาพร้อมกล้องที่ดีสุดใน Galaxy และปากกา S Pen ที่เป็นมากกว่าปากกา มาพร้อม Space Zoom ซูมไกล 100 เท่า ไกลแค่ไหนก็ใกล้ได้  ให้ความคมชัด High-resolution กล้องคุณภาพสูง 200MP เก็บครบทุกรายละเอียด มากกว่าที่ตาคุณเห็น ถ่ายภาพคมชัดที่สุดที่เคยมีมาในสมาร์ทโฟน S Pen ที่เป็นทั้งปากกา และผู้ช่วยส่วนตัว ปากกาเขียนลื่นเหมือนใช้ปากกาจริง ใช้สั่งถ่ายรูป เปลี่ยนสไลด์ แปลภาษา แต่งรูป เล่นเกม และอีกมากมาย
+
+- ขนาดหน้าจอ 6.8 นิ้ว (แนวทะแยง)
+- ความละเอียด 3,088 x 1,440 พิกเซล (500ppi)
+- แบตเตอรี่ 5,000 mAh
+- กล้องหน้า 12 MP (f/2.2) 2PD AF
+- กล้องหลัง 200 MP (f/1.7) Wide
+
+
+Price: 49900
+Qty: 5
+
+--------------
+
+เสื้อโปโล Dry ผ้าปิเก้ แขนสั้น ลายทาง
+
+ผ้าคอตตอนผสมโพลีเอสเตอร์รีไซเคิลให้สัมผัสนุ่มและทนทาน องค์ประกอบหลักของเสื้อรุ่นนี้ยังคงพัฒนาอย่างไม่หยุดยั้ง
+
+slug: polo-shirt
+Price: 790
+Qty: 2
+
+--------------
+
+Philips Avent
+
+PHILIPS AVENTขวดนมรุ่นเนเชอรัล ช่วยให้การสลับให้นมระหว่างอกแม่และขวดนมได้ง่าย ขวดนมขนาด 260 มล. (9 ออนซ์) ผลิตจากวัสดุ PP ปราศจากสาร BPA ช่วยส่งเสริมพัฒนาการของเด็ก ด้านการมองเห็นสีและรูปร่าง จุกนมมีรูปร่าง ขนาดและผิวสัมผัสเสมือนเต้านมแม่ จุกนมมีอ่อนนุ่มและยืดหยุ่นได้ดี ขนาดจุกนมเหมาะสำหรับเด็กอายุ 1 เดือนขึ้นไป
+
+- สี : หลากสี
+- ปริมาณสุทธิ : 9 ออนซ์
+- อายุสินค้านับจากวันผลิต : 5 ปี
+- ความกว้าง : 7.1 ซม.
+- ความสูง : 7.1 ซม.
+- ความลึก : 16.6 ซม.
+- น้ำหนัก (ก.ก.) : 0.748
+- ประเทศเจ้าของแบรนด์ : Indonesia
+- เพศ : ยูนิเซ็กส์
+- อายุ : ทารก
+- มอก. 969 - 2533
+
+หมายเหตุ : สีของผลิตภัณฑ์ที่แสดงบนเว็บไซต์อาจมีความแตกต่างกันจากการตั้งค่าการแสดงผลสีของแต่ละหน้าจอ
+
+Price: 400
+Qty: 8
+
+
+---------------
+
+ทดสอบ Register ผ่าน API
+---
+http://localhost:1337/api/auth/local/register
+
+{  
+  "username":"samit",  
+  "email":"samit@email.com",  
+  "password": "123456"
+}
+
+---------------
+
+ทดสอบ Login ผ่าน API
+http://localhost:1337/api/auth/local
+
+{  
+  "identifier":"samit",  
+  "password": "123456"
+}
+
+----------------
+
+ทดสอบเรียก API Products
+http://localhost:1337/api/products
+
+----------------
+
+Install Open API Document Plugin (Swagger) 
+---
+docker compose exec strapi npm run strapi install documentation
+
+URL API Document
+---
+http://localhost:1337/documentation/v1.0.0
